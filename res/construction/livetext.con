@@ -1,0 +1,37 @@
+local livetext = require "livetext"
+local coor = require "livetext/coor"
+
+local updateFn = function(params)
+    local models, width = livetext("lato", "bold")(10, 10)("too simple, sometimes naïve")
+    return {
+        models = models(coor.transX(-0.5 * width * 0.01)),
+        cost = 0,
+        bulldozeCost = 0,
+        maintenanceCost = 0,
+        terrainAlignmentLists = {
+            {
+                type = "EQUAL",
+                faces = {}
+            }
+        }
+    }
+end
+
+function data()
+    return {
+        type = "RAIL_STATION",
+        description = {
+            name = _("65"),
+            description = _("")
+        },
+        availability = {
+            yearFrom = 1850,
+            yearTo = 0,
+        },
+        order = 5009,
+        skipCollision = true,
+        autoRemovable = false,
+        params = {},
+        updateFn = updateFn
+    }
+end
