@@ -15,7 +15,7 @@ namespace Livetext
         static void Main(string[] args)
         {
             new FontExtractor("Lato").generate();
-            new FontExtractor("Lato", FontStyle.Bold).generate();
+            //new FontExtractor("Lato", FontStyle.Bold).generate();
 
         }
     }
