@@ -1,27 +1,62 @@
 function data() return 
-  { animations = {  }, matConfigs = { { 0 } }, 
-    subMeshes = 
-      { 
-        { 
-          indices = 
-            { 
-              normal = { count = 24, offset = 288 }, 
-              position = { count = 24, offset = 288 }, 
-              tangent = { count = 24, offset = 288 }, 
-              uv0 = { count = 24, offset = 288 }, 
-             }, 
-          materials = { "livetext/lato/10525.mtl" }
-         }
-    }, 
-    vertexAttr = 
-      { 
-        normal = 
-          { count = 72, numComp = 3, offset = 120 }, 
-        position = 
-          { count = 72, numComp = 3, offset = 0 }, 
-        tangent = 
-          { count = 96, numComp = 4, offset = 192 }, 
-        uv0 = 
-          { count = 48, numComp = 2, offset = 72 }, 
+  {
+animations = {  },
+matConfigs = { { 0 } },
+subMeshes = 
+    { 
+      {
+indices = 
+        {
+normal = 
+          {
+count = 132,
+offset = 1584
+           },
+position = 
+          {
+count = 132,
+offset = 1584
+           },
+tangent = 
+          {
+count = 132,
+offset = 1584
+           },
+uv0 = 
+          {
+count = 132,
+offset = 1584
+           }
+         },
+materials = 
+        { "livetext/lato/CFFFFFFFF.mtl" }
        }
+     },
+vertexAttr = 
+    {
+normal = 
+      {
+count = 396,
+numComp = 3,
+offset = 660
+       },
+position = 
+      {
+count = 396,
+numComp = 3,
+offset = 0
+       },
+tangent = 
+      {
+count = 528,
+numComp = 4,
+offset = 1056
+       },
+uv0 = 
+      {
+count = 264,
+numComp = 2,
+offset = 396
+       }
+     }
    } end

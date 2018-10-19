@@ -14,131 +14,55 @@ namespace Livetext
 {
     class FontExtractor
     {
-        void drawLetter(uint l)
-        {
-            Livetext.Output.drawGlyph(font, texturesPath, l);
-        }
-
-
-        void createModel(uint c)
-        {
-            string bTexturePath = texturesPath.Replace("res/textures/", "");
-            string bMaterialPath = materialPath.Replace("res/models/material/", "");
-            string bModelPath = modelPath.Replace("res/models/model/", "");
-
-            string mdl =
-                @"
-function data()
-return {
-	collider = {
-		params = {
-			center = { .0, .0, .0 },
-			halfExtents = { .0, .0, .0 }
-		},
-		type = ""BOX""
-
-    },
-	lods = {
-        {
-            animations = {},
-            children = {
-                {
-                    id = """ + bModelPath + c.ToString() + @".msh"",
-                    transf = {
-                        1, 0, 0, 0, 
-                        0, 1, 0, 0, 
-                        0, 0, 1, 0, 
-                        0, 0, 0, 1,
-                    },
-                    type = ""MESH"",
-                },
-            },
-            events = {},
-            matConfigs = {{0}},
-            static = true,
-            visibleFrom = 0,
-            visibleTo = 2000,
-            
-        },
-	},
-	metadata = {
-	}	
-}
-end
-";
-            Output.generateMesh(bMaterialPath, modelPath, c);
-            Output.generateMaterial(materialPath, bTexturePath, c);
-            System.IO.File.WriteAllText(modelPath + c.ToString() + ".mdl", mdl);
-            //System.IO.File.Copy("31.msh.blob", meshPath + c.ToString() + ".msh.blob", true);
-        }
-
-        void createFontDescription(List<uint> cp)
-        {
-            string output = "";
-            var k = new FontParams();
-            var ke = k.ExaminePairs(new Font(font.FontFamily, 60f, font.Style), cp);
-
-            output += "local abc = {";
-            foreach (var (l, a, b, c, ker) in ke)
-            {
-                output += String.Format(
-                    "[{0}] = {{" +
-                    "a = {1}, b = {2}, c = {3}" +
-                    "}},\n",
-                    l, a, b, c
-                    );
-            }
-            output += "}\n";
-
-
-            output += "local kern = {";
-            foreach (var (l, a, b, c, ker) in ke)
-            {
-                if (ker.Count > 0)
-                {
-                    output += "[" + l.ToString() + "] = {";
-                    foreach (var (s, kern) in ker)
-                        if (cp.Contains(s))
-                            output += "[" + s.ToString() + "] = " + kern.ToString() + ",\n";
-                    output += "},\n";
-                }
-            }
-            output += "}\n";
-            output += "return {abc, kern}";
-            System.IO.File.WriteAllText(scriptsPath + key + ".lua", output);
-        }
-
         public void generate()
         {
             var cp = Enumerable.Range(0x20, 95)
                 .Concat(Enumerable.Range(0x0A1, 431)) // Latin
                 .Concat(Enumerable.Range(0x1E00, 256)) // Latin
-                .Concat(Enumerable.Range(0x400, 256)) // Cyrillic
-                .Concat(Enumerable.Range(0x500, 48)) // Cyrillic
-                .Concat(Enumerable.Range(0x370, 144)) // Greek
+                //.Concat(Enumerable.Range(0x400, 256)) // Cyrillic
+                //.Concat(Enumerable.Range(0x500, 48)) // Cyrillic
+                //.Concat(Enumerable.Range(0x370, 144)) // Greek
                 .Concat(Enumerable.Range(0x2030, 2)) // per mille
-                .Concat(Enumerable.Range(0x2190, 112)) // Arrows
-                .Concat(Enumerable.Range(0x2900, 128)) // Arrows
+                //.Concat(Enumerable.Range(0x2190, 112)) // Arrows
+                //.Concat(Enumerable.Range(0x2900, 128)) // Arrows
                                                        //.Concat(Enumerable.Range(0x3041, 86)) // Hiragana
                                                        //.Concat(Enumerable.Range(0x3099, 7)) // Hiragana
                                                        //.Concat(Enumerable.Range(0x30A0, 112)) // Katakana 
+
+                .Except(new List<int>() { 0x46D, 0x4FD, 0x3D6 })
                 .Select(c => checked((uint)c))
                 .ToList()
                 ;
 
-            System.IO.Directory.CreateDirectory(scriptsPath);
-            System.IO.Directory.CreateDirectory(texturesPath);
-            System.IO.Directory.CreateDirectory(meshPath);
-            System.IO.Directory.CreateDirectory(modelPath);
-            System.IO.Directory.CreateDirectory(materialPath);
+            if (!Directory.Exists(materialPath + midFix)) Directory.CreateDirectory(materialPath + midFix);
+            if (!Directory.Exists(texturesPath + midFix)) Directory.CreateDirectory(texturesPath + midFix);
+            if (!Directory.Exists(meshPath + midFix)) Directory.CreateDirectory(meshPath + midFix);
+            if (!Directory.Exists(modelPath + midFix)) Directory.CreateDirectory(modelPath + midFix);
+            if (!Directory.Exists(scriptsPath + "livetext/")) Directory.CreateDirectory(scriptsPath + "livetext/");
 
-            cp.ToList().AsParallel()
-            .ForAll(drawLetter);
+            //cp.ToList().AsParallel()
+            //.ForAll(c =>
+            //{
+            //    Output.drawGlyph(font, midFix, texturesPath, materialPath, c);
+            //    Output.generateMesh(midFix, meshPath + midFix, c);
+            //    Output.generateModel(midFix, modelPath + midFix, c);
+            //}
+            //);
+
+            var mat = Output.drawColorTexture(midFix, texturesPath, materialPath, Color.FromArgb(255, 255, 255, 255));
+            var trans = Output.drawColorTexture(midFix, texturesPath, materialPath, Color.FromArgb(0, 255, 255, 255));
 
             cp.ToList()
-            .ForEach(createModel);
+            .ForEach(c =>
+            {
+                Output.extractPolygon(mat, trans, meshPath + midFix, font, c);
+                //Output.drawGlyph(font, midFix, texturesPath, materialPath, c);
+                //Output.generateMesh(midFix, meshPath + midFix, c);
+                Output.generateModel(midFix, modelPath + midFix, c);
+            }
+            );
 
-            createFontDescription(cp);
+            Output.generateDescription(new Font(font.FontFamily, 60f, font.Style), cp, scriptsPath + "livetext/" + key + ".lua");
         }
 
         public FontExtractor(string facename, FontStyle style = FontStyle.Regular)
@@ -146,18 +70,16 @@ end
             font = new Font(facename, 60f, style);
             key = (font.FontFamily.Name + (font.Style == FontStyle.Regular ? "" : ("_" + font.Style.ToString()))).ToLower();
 
-            scriptsPath = "res/scripts/livetext/";
-            texturesPath = "res/textures/models/livetext/" + key + "/";
-            meshPath = "res/models/mesh/livetext/" + key + "/";
-            materialPath = "res/models/material/livetext/" + key + "/";
-            modelPath = "res/models/model/livetext/" + key + "/";
+            midFix = "livetext/" + key + "/";
         }
 
-        string scriptsPath;
-        string texturesPath;
-        string meshPath;
-        string materialPath;
-        string modelPath;
+        string midFix;
+        static string scriptsPath = "res/scripts/";
+        static string texturesPath = "res/textures/";
+        static string meshPath = "res/models/mesh/";
+        static string materialPath = "res/models/material/";
+        static string modelPath = "res/models/model/";
+
         Font font;
         string key;
     }
