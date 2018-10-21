@@ -48,15 +48,15 @@ local gen = function(font, style)
                     local nextPos = pos + abc.b + abc.c
                     return r / {c = c, from = pos, to = nextPos}
                 end)
-
+            local width = #result > 0 and result[#result].to * scale * 0.01 or false
             return 
-                function(transf) return func.map(result, function(r)
+                function(fTrans) return func.map(result, function(r)
                     return {
                         id = "livetext/" .. facename .. "/" .. tostring(r.c) .. ".mdl",
-                        transf = coor.transX(r.from * 0.01) * coor.transZ(z * 0.1) * coor.scale(coor.xyz(scale, scale, scale)) * (transf or coor.I())
+                        transf = coor.transX(r.from * 0.01) * coor.scale(coor.xyz(scale, scale, scale)) * coor.transZ(z * scale) * (fTrans(width) or coor.I())
                     }
                 end)
-            end, result[#result].to * scale * 0.01
+            end, width
         end
     end
 end

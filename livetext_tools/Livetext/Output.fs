@@ -132,7 +132,7 @@ module Output =
         ) in
         let colorName = sprintf "C%02X%02X%02X%02X" color.A color.R color.G color.B
         dds (texturesPath + midFix + colorName) mipmap;
-        generateMaterial (midFix + colorName) (materialPath + midFix + colorName);
+        generateMaterial ("models/" + midFix + colorName) (materialPath + midFix + colorName);
         midFix + colorName
 
     let drawGlyph (font : Font) midFix texturesPath materialPath (gl : uint32) =
@@ -287,13 +287,13 @@ module Output =
     let extractPolygon materialPath transMaterialPath outputPath (font : Font) (glyph : uint32) = 
       let pts  = 
         use path = new GraphicsPath()
-        path.AddString((char glyph).ToString(), font.FontFamily, (int)font.Style, 80.0f, new PointF(0.0f, 0.0f), StringFormat.GenericDefault)
+        path.AddString((char glyph).ToString(), font.FontFamily, (int)font.Style, 80.0f, new PointF(0.0f, 0.0f), StringFormat.GenericTypographic)
         path.Flatten()
         match path.PointCount with
           | 0 -> [||]
           | _ -> Array.zip path.PathPoints path.PathTypes
       
-      let poly = 
+      let (poly, aValue) = 
         pts 
         |> Array.fold (fun result (pt, t) ->
             match t &&& 0x07uy, t &&& 0xF8uy, result with
@@ -304,9 +304,19 @@ module Output =
         ) []
         |> List.map List.rev
         |> List.rev
-        |> List.map (List.map (fun p -> new PolygonPoint(float p.X, float p.Y)))
-        |> List.map (fun p -> new Polygon(p))
-      
+        |> fun p -> 
+          (
+            p
+            |> List.map (List.map (fun p -> new PolygonPoint(float p.X, float p.Y)))
+            |> List.map (fun p -> new Polygon(p)),
+            match p with
+            | [] -> 0.0f
+            | _ -> 
+              p
+              |> List.concat
+              |> List.map (fun p -> p.X)
+              |> List.head
+          )
       
       let vertices = 
         match poly.Length with
@@ -318,7 +328,7 @@ module Output =
           |> List.ofSeq
           |> List.collect(fun p -> List.ofSeq p.Triangles)
           |> List.collect(fun t -> List.ofSeq t.Points)
-          |> List.map(fun p -> new Vector3(p.Xf * 0.01f, 0.0f, (50.0f - p.Yf) * 0.01f))
+          |> List.map(fun p -> new Vector3(p.Xf * 0.01f, 0.0f, (80.0f - p.Yf) * 0.01f))
       
       let mesh : MeshData = {
         normals = vertices |> List.map (fun _ -> new Vector3(0.0f, -1.0f, 0.0f));

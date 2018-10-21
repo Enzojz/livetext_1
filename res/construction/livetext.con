@@ -3,18 +3,18 @@ local coor = require "livetext/coor"
 local pipe = require "livetext/pipe"
 
 local updateFn = function(params)
-    local models1, width1 = livetext("lato")(10, 40)("Berlin Südkreuz")
-    local models2, width2 = livetext("lato")(10, 30)("⇅")
-    local models3, width3 = livetext("lato")(10, 20)("Lyon Saint-Exupéry")
-    local models4, width4 = livetext("lato")(10, 10)("⇅")
-    local models5, width5 = livetext("lato")(10, 0)("Москва Белорусский")
+    local models1 = livetext("lato")(10, 4)("Berlin Südkreuz")
+    local models2 = livetext("lato")(10, 3)("⇅")
+    local models3 = livetext("lato")(10, 2)("Lyon Saint-Exupéry")
+    local models4 = livetext("lato")(10, 1)("⇅")
+    local models5 = livetext("lato")(10, 0)("Москва Белорусский")
     return {
         models = pipe.new 
-        + models1(coor.transX(-0.5 * width1 * 0.01))
-        + models2(coor.transX(-0.5 * width2 * 0.01))
-        + models3(coor.transX(-0.5 * width3 * 0.01))
-        + models4(coor.transX(-0.5 * width4 * 0.01))
-        + models5(coor.transX(-0.5 * width5 * 0.01)),
+        + models1(function(w) return coor.transX(-0.5 * w) end)
+        + models2(function(w) return coor.transX(-0.5 * w) end)
+        + models3(function(w) return coor.transX(-0.5 * w) end)
+        + models4(function(w) return coor.transX(-0.5 * w) end)
+        + models5(function(w) return coor.transX(-0.5 * w) end),
         cost = 0,
         bulldozeCost = 0,
         maintenanceCost = 0,
