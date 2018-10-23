@@ -306,9 +306,7 @@ module Output =
         |> List.rev
         |> fun p -> 
           (
-            p
-            |> List.map (List.map (fun p -> new PolygonPoint(float p.X, float p.Y)))
-            |> List.map (fun p -> new Polygon(p)),
+            p |> List.map (List.map (fun p -> new Vector2(p.X, p.Y))),
             match p with
             | [] -> 0.0f
             | _ -> 
@@ -318,18 +316,41 @@ module Output =
               |> List.head
           )
       
-      let vertices = 
+      let triangles = 
         match poly.Length with
         | 0 -> []
         | _ ->
-          let polygonSet = PolyTest.CreateSetFromList(poly)
+          let polygonSet = Poly.generatePolygonSet(poly)
           P2T.Triangulate(polygonSet)
-          polygonSet.Polygons
+          polygonSet
           |> List.ofSeq
           |> List.collect(fun p -> List.ofSeq p.Triangles)
-          |> List.collect(fun t -> List.ofSeq t.Points)
-          |> List.map(fun p -> new Vector3(p.Xf * 0.01f, 0.0f, (80.0f - p.Yf) * 0.01f))
+
+      let vertices = 
+        triangles
+        |> List.collect(fun t -> List.ofSeq t.Points)
+        |> List.map(fun p -> new Vector3(p.Xf * 0.01f, 0.0f, (80.0f - p.Yf) * 0.01f))
       
+      //bmp check
+      let size = new Size(200, 200)
+      let bmp = new Bitmap(size.Width, size.Height)
+      let rect = new Rectangle(new Point(0, 0), size)
+      let g = Graphics.FromImage(bmp)
+      g.SmoothingMode <- SmoothingMode.AntiAlias;
+      g.InterpolationMode <- InterpolationMode.HighQualityBicubic;
+      g.PixelOffsetMode <- PixelOffsetMode.HighQuality;
+      g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit;
+
+      g.FillRectangle(new SolidBrush(Color.FromArgb(0, 255, 255, 255)), rect);
+      triangles |> List.iter (fun t ->
+        g.DrawPolygon(new Pen(new SolidBrush(Color.FromArgb(255, 0, 0, 0))),
+          t.Points |> Seq.map (fun p -> new Point(int p.X * 2, int p.Y * 2)) |> Seq.toArray
+        )
+      )
+      g.Flush()
+      bmp.Save(outputPath + glyph.ToString() + ".bmp")
+
+
       let mesh : MeshData = {
         normals = vertices |> List.map (fun _ -> new Vector3(0.0f, -1.0f, 0.0f));
         vertices = vertices;
@@ -345,19 +366,3 @@ module Output =
       let blobPath = mshPath + ".blob"
       File.WriteAllBytes(blobPath, blob)
       File.WriteAllText(mshPath, msh)
-
-
-
-
-
-
-
-
-
-        
-        
-
-      
-
-      
-

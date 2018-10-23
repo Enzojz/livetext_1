@@ -21,5 +21,5 @@ let main argv =
       |> List.map (uint32)
     
     //Directory.Delete("res", true)
-    Task.task cp "Lato" FontStyle.Regular
+    Task.task cp "Arial" FontStyle.Regular
     0 // return an integer exit code
