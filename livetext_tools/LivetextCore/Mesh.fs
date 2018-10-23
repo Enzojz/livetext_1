@@ -1,12 +1,10 @@
-﻿
-
-namespace Livetext
+﻿namespace Livetext
 
 open System
 open Lua
+open System.Numerics
 
 module Mesh =
-  open System.Numerics
 
   type MeshData = {
         normals : Vector3 list;

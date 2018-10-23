@@ -2,21 +2,20 @@
 #light
 namespace Livetext
 
+open System
+open System.Numerics
 open System.Drawing
 open System.Drawing.Drawing2D
 open System.Drawing.Text
 open System.Runtime.InteropServices
 open System.IO
+open Poly2Tri
 open Squish
 open Mesh
 open Lua
 open Import
 
 module Output =
-    open System.IO
-    open System.Numerics
-    open System
-    open Poly2Tri
 
     //[<Flags>]
     type DDSFlags =
@@ -267,15 +266,15 @@ module Output =
           L ("abc" ,
             X (param |> List.map (fun (g, a, b, c, _) ->
               (int g, P [
-                ("a", V (int a));
-                ("b", V (int b));
-                ("c", V (int c));
+                ("a", N (float (a / font.Size)));
+                ("b", N (float (b / font.Size)));
+                ("c", N (float (c / font.Size)));
               ])
             ))
           );
           L ("kern", 
             X (param 
-              |> List.map (fun (g, _, _, _, kern) -> (int g, X (kern |> Array.filter (fun (c, _) -> Seq.contains (uint32 c) cp) |> Array.map (fun (c, k) -> (int c, V k)) |> List.ofArray))) 
+              |> List.map (fun (g, _, _, _, kern) -> (int g, X (kern |> Array.filter (fun (c, _) -> Seq.contains (uint32 c) cp) |> Array.map (fun (c, k) -> (int c, N (float (float32 k /font.Size)))) |> List.ofArray))) 
               |> List.filter (function (_, X []) -> false | _ -> true)
             )
           );
@@ -284,85 +283,85 @@ module Output =
        |> printLua 0
       System.IO.File.WriteAllText(scriptPath, lua);
             
-    let extractPolygon materialPath transMaterialPath outputPath (font : Font) (glyph : uint32) = 
-      let pts  = 
+    let extractPolygon materialPath transMaterialPath outputPath (font : Font) =
+      let transform = 
         use path = new GraphicsPath()
-        path.AddString((char glyph).ToString(), font.FontFamily, (int)font.Style, 80.0f, new PointF(0.0f, 0.0f), StringFormat.GenericTypographic)
+        path.AddString("M", font.FontFamily, (int)font.Style, font.Size, new PointF(0.0f, 0.0f), StringFormat.GenericTypographic)
         path.Flatten()
-        match path.PointCount with
-          | 0 -> [||]
-          | _ -> Array.zip path.PathPoints path.PathTypes
+        path.PathPoints 
+        |> Seq.map (fun p -> p.Y) 
+        |> (fun y -> fun pt -> pt - new Vector2(0.0f, Seq.max y))
       
-      let (poly, aValue) = 
-        pts 
-        |> Array.fold (fun result (pt, t) ->
-            match t &&& 0x07uy, t &&& 0xF8uy, result with
-              | 0x00uy, _, _ -> [pt] :: result
-              | _, 0x80uy, current :: rest -> if List.last current = pt then result else (pt :: current) :: rest
-              | _, _, current :: rest -> (pt :: current) :: rest  
-              | _ -> result
-        ) []
-        |> List.map List.rev
-        |> List.rev
-        |> fun p -> 
-          (
-            p |> List.map (List.map (fun p -> new Vector2(p.X, p.Y))),
-            match p with
-            | [] -> 0.0f
-            | _ -> 
-              p
-              |> List.concat
-              |> List.map (fun p -> p.X)
-              |> List.head
-          )
+      fun (glyph : uint32) ->
+        let pts  = 
+          use path = new GraphicsPath()
+          path.AddString((char glyph).ToString(), font.FontFamily, (int)font.Style, font.Size, new PointF(0.0f, 0.0f), StringFormat.GenericTypographic)
+          path.Flatten()
+          match path.PointCount with
+            | 0 -> [||]
+            | _ -> Array.zip path.PathPoints path.PathTypes
       
-      let triangles = 
-        match poly.Length with
-        | 0 -> []
-        | _ ->
-          let polygonSet = Poly.generatePolygonSet(poly)
-          P2T.Triangulate(polygonSet)
-          polygonSet
-          |> List.ofSeq
-          |> List.collect(fun p -> List.ofSeq p.Triangles)
-
-      let vertices = 
-        triangles
-        |> List.collect(fun t -> List.ofSeq t.Points)
-        |> List.map(fun p -> new Vector3(p.Xf * 0.01f, 0.0f, (80.0f - p.Yf) * 0.01f))
+        let poly = 
+          pts 
+          |> Array.fold (fun result (pt, t) ->
+              match t &&& 0x07uy, t &&& 0xF8uy, result with
+                | 0x00uy, _, _ -> [pt] :: result
+                | _, 0x80uy, current :: rest -> if List.last current = pt then result else (pt :: current) :: rest
+                | _, _, current :: rest -> (pt :: current) :: rest  
+                | _ -> result
+          ) []
+          |> List.map List.rev
+          |> List.rev
+          |> List.map (List.map (fun p -> new Vector2(p.X, p.Y) |> transform))
       
-      //bmp check
-      let size = new Size(200, 200)
-      let bmp = new Bitmap(size.Width, size.Height)
-      let rect = new Rectangle(new Point(0, 0), size)
-      let g = Graphics.FromImage(bmp)
-      g.SmoothingMode <- SmoothingMode.AntiAlias;
-      g.InterpolationMode <- InterpolationMode.HighQualityBicubic;
-      g.PixelOffsetMode <- PixelOffsetMode.HighQuality;
-      g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit;
+        let triangles = 
+          match poly.Length with
+          | 0 -> []
+          | _ ->
+            let polygonSet = Poly.generatePolygonSet(poly)
+            P2T.Triangulate(polygonSet)
+            polygonSet
+            |> List.ofSeq
+            |> List.collect(fun p -> List.ofSeq p.Triangles)
 
-      g.FillRectangle(new SolidBrush(Color.FromArgb(0, 255, 255, 255)), rect);
-      triangles |> List.iter (fun t ->
-        g.DrawPolygon(new Pen(new SolidBrush(Color.FromArgb(255, 0, 0, 0))),
-          t.Points |> Seq.map (fun p -> new Point(int p.X * 2, int p.Y * 2)) |> Seq.toArray
-        )
-      )
-      g.Flush()
-      bmp.Save(outputPath + glyph.ToString() + ".bmp")
-
-
-      let mesh : MeshData = {
-        normals = vertices |> List.map (fun _ -> new Vector3(0.0f, -1.0f, 0.0f));
-        vertices = vertices;
-        tangents = vertices |> List.map (fun _ -> new Vector3(1.0f, 0.0f, 0.0f));
-        uv0 = vertices |> List.map (fun v -> new Vector2(v.X, v.Z));
-        uv1 = [];
-        indices = List.init (List.length vertices / 3) (fun i -> new Tuple<int, int, int>(i * 3, i * 3 + 1, i * 3 + 2));
-      }
-
-      let (blob, msh) = if vertices.IsEmpty then Mesh.generate squareMesh transMaterialPath else Mesh.generate mesh materialPath
+        let vertices = 
+          triangles
+          |> List.collect(fun t -> List.ofSeq t.Points)
+          |> List.map(fun p -> new Vector3(p.Xf, 0.0f, -p.Yf) / font.Size)
       
-      let mshPath = outputPath + glyph.ToString() + ".msh"
-      let blobPath = mshPath + ".blob"
-      File.WriteAllBytes(blobPath, blob)
-      File.WriteAllText(mshPath, msh)
+        ////bmp check
+        //begin
+        //  let size = new Size(1000, 1000)
+        //  let bmp = new Bitmap(size.Width, size.Height)
+        //  let rect = new Rectangle(new Point(0, 0), size)
+        //  let brush = new Pen(new SolidBrush(Color.Black))
+        //  let g = Graphics.FromImage(bmp)
+        //  g.SmoothingMode <- SmoothingMode.AntiAlias;
+        //  g.InterpolationMode <- InterpolationMode.HighQualityBicubic;
+        //  g.PixelOffsetMode <- PixelOffsetMode.HighQuality;
+        //  g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit;
+        //  g.FillRectangle(new SolidBrush(Color.White), rect);
+        //  g.DrawLine(brush, 0, 800, 1000, 800)
+        //  g.DrawRectangle(brush, rect)
+        //  triangles |> List.iter (fun t ->
+        //    g.DrawPolygon(brush, t.Points |> Seq.map (fun p -> new Point(int (p.X * 10.0), int (-p.Y * 10.0))) |> Seq.toArray)
+        //  )
+        //  g.Flush()
+        //  bmp.Save(outputPath + glyph.ToString() + ".bmp")
+        //end
+
+        let mesh : MeshData = {
+          normals = vertices |> List.map (fun _ -> new Vector3(0.0f, -1.0f, 0.0f));
+          vertices = vertices;
+          tangents = vertices |> List.map (fun _ -> new Vector3(1.0f, 0.0f, 0.0f));
+          uv0 = vertices |> List.map (fun v -> new Vector2(v.X, v.Z));
+          uv1 = [];
+          indices = List.init (List.length vertices / 3) (fun i -> new Tuple<int, int, int>(i * 3, i * 3 + 1, i * 3 + 2));
+        }
+
+        let (blob, msh) = if vertices.IsEmpty then Mesh.generate squareMesh transMaterialPath else Mesh.generate mesh materialPath
+      
+        let mshPath = outputPath + glyph.ToString() + ".msh"
+        let blobPath = mshPath + ".blob"
+        File.WriteAllBytes(blobPath, blob)
+        File.WriteAllText(mshPath, msh)

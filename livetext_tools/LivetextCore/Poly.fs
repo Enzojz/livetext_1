@@ -1,11 +1,9 @@
 ﻿namespace Livetext
-open Poly2Tri
+open System.Numerics
+open Poly2Tri.Triangulation.Polygon
 
   module Poly =
-    open System.Numerics
-    open System.Windows
-    open Poly2Tri.Triangulation.Polygon
-
+    
     type PolyTree = 
       {
         node : Vector2 list;
@@ -19,7 +17,7 @@ open Poly2Tri
         let rhsSegs = 
           List.zip rhs (((List.head rhs) :: (List.tail rhs |> List.rev)) |> List.rev)
         let isInPolygon (point : Vector2) =
-          let mRot = 
+          let mRot = // Rotation to avoid parallel segments and interestion on the segement extremities
             List.map (fun (p1, p2) -> p2 - p1) rhsSegs @ List.map (fun p -> p - point) rhs
             |> List.filter (fun v -> v.Length() > 0.0f)
             |> List.map (fun v -> atan2 v.Y v.X)
@@ -28,14 +26,12 @@ open Poly2Tri
             |> List.except [0.0f]
             |> function fst :: _ -> -0.5f * fst | _ -> 0.0f
             |> Matrix3x2.CreateRotation
-          let vaildSegs = 
-            rhsSegs 
-              |> List.map (fun (p1, p2) ->
-                Vector2.Transform(p1 - point, mRot),
-                Vector2.Transform(p2 - point, mRot)
-              )
-              |> List.filter (fun (p1, p2) -> p1.Y * p2.Y < 0.0f)
-          vaildSegs
+          rhsSegs 
+            |> List.map (fun (p1, p2) ->
+              Vector2.Transform(p1 - point, mRot),
+              Vector2.Transform(p2 - point, mRot)
+            )
+            |> List.filter (fun (p1, p2) -> p1.Y * p2.Y < 0.0f)
             |> List.map (fun (p1, p2) ->  p1 + (p2 - p1) * (-p1.Y) / (p2.Y - p1.Y))
             |> List.partition (fun p -> p.X < 0.0f)
             |> fun (l, r) -> l.Length % 2 = 1 && r.Length % 2 = 1
@@ -53,24 +49,24 @@ open Poly2Tri
         | _, false -> { node with children = poly :: node.children }, true
       | _, false, true -> { poly with children = node :: poly.children }, true
       | _, false, false -> node, false
-      | _, true, true -> assert false; node, false
+      | _, true, true -> assert false; node, false // Only node = poly in this case which is not vaild
       
     let generatePolygonSet (polys : Vector2 list list) =
-      let root = polys |> List.fold (fun r p -> match tryInsertInto r { node = p; children = []} with r, _ -> r) { node = []; children = [] }
       let toPoly (pts : Vector2 list) = new Polygon(pts |> List.map (fun p -> new PolygonPoint(float p.X, float p.Y)))
 
       let rec flattenPoly isHole (node : PolyTree) = 
         match isHole with 
         | false ->
-            let p = node.node |> toPoly
-            node.children |> List.iter (fun c -> p.AddHole(c.node |> toPoly))
+            let p = toPoly node.node
+            node.children |> List.iter (fun c -> p.AddHole(toPoly c.node))
             p :: (node.children |> List.map (flattenPoly true) |> List.concat)
         | true ->
             node.children |> List.map (flattenPoly false) |> List.concat
-
-      Seq.ofList (flattenPoly true root)
       
-
+      polys 
+      |> List.fold (fun r p -> match tryInsertInto r { node = p; children = []} with r, _ -> r) { node = []; children = [] }
+      |> flattenPoly true
+      |> Seq.ofList
             
             
         

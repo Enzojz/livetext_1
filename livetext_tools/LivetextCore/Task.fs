@@ -12,7 +12,7 @@ module Task =
       let materialPath = "res/models/material/"
       let modelPath = "res/models/model/"
 
-      let font = new Font(facename, 80.0f, style)
+      let font = new Font(facename, 80.0f, style, GraphicsUnit.Pixel)
       let key = (font.FontFamily.Name + (if font.Style = FontStyle.Regular then "" else ("_" + font.Style.ToString()))).ToLower()
 
       let midFix = "livetext/" + key + "/"
@@ -35,11 +35,13 @@ module Task =
       let mat = Output.drawColorTexture midFix texturesPath materialPath (Color.FromArgb(255, 255, 255, 255))
       let trans = Output.drawColorTexture midFix texturesPath materialPath (Color.FromArgb(0, 255, 255, 255))
 
+      let extractPolygon= Output.extractPolygon mat trans (meshPath + midFix) font
+      let generateModel = Output.generateModel midFix (modelPath + midFix)
       cp
       |> List.iter
         (fun c ->
-            Output.extractPolygon mat trans (meshPath + midFix) font c
-            Output.generateModel midFix (modelPath + midFix) c
+            extractPolygon c
+            generateModel c
         )
 
       Output.generateDescription font cp (scriptsPath + "livetext/" + key + ".lua")
