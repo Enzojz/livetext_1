@@ -13,7 +13,7 @@ module Task =
       let modelPath = "res/models/model/"
 
       let font = new Font(facename, 80.0f, style, GraphicsUnit.Pixel)
-      let key = (font.FontFamily.Name + (if font.Style = FontStyle.Regular then "" else ("_" + font.Style.ToString()))).ToLower()
+      let key = (font.FontFamily.Name + (if font.Style = FontStyle.Regular then "" else ("_" + font.Style.ToString()))).ToLower().Replace(' ', '_')
 
       let midFix = "livetext/" + key + "/"
             
@@ -38,7 +38,8 @@ module Task =
       let extractPolygon= Output.extractPolygon mat trans (meshPath + midFix) font
       let generateModel = Output.generateModel midFix (modelPath + midFix)
       cp
-      |> List.iter
+      |> List.toArray
+      |> Array.Parallel.iter
         (fun c ->
             extractPolygon c
             generateModel c

@@ -1,8 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <PackageId>Livetext</PackageId>
+    <Authors>Enzojz</Authors>
+    <Product>Livetext</Product>
+    <Description>Livetext resource generator for Transport Fever</Description>
+    <Copyright>Enzojz / JIANG ZHENG</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="3.1.6" />
+    <PackageReference Include="Fody" Version="3.2.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="LibSquishNet" Version="1.11.5792.20541" />
     <PackageReference Include="Poly2Tri.NetStandard" Version="1.0.2" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
