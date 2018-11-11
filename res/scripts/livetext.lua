@@ -32,9 +32,19 @@ local function utf2unicode(str)
 end
 
 local gen = function(font, style, color)
-    local facename = (style and font .. "_" .. style or font):lower()
-    
-    local abc, kern = unpack(require("livetext/" .. facename))
+    local facename, color, abc, kern = (function()
+        local facename = (style and font .. "_" .. style or font):lower()
+        local r, i = xpcall(
+            require,
+            function(e) print ("not able to find font " .. facename .. ", fallback used") end,
+            "livetext/" .. facename
+        )
+        if (r and i) then
+            return facename, color, unpack(i)
+        else
+            return  "lato", "CFFFFFF", unpack(require("livetext/lato"))
+        end
+    end)()
     local path = "livetext/" .. facename .. "/" .. color .. "/"
     return function(scale, z, twoSide)
         local scale = scale or 1
