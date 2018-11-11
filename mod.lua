@@ -1,7 +1,6 @@
 ﻿function data()
     return {
         info = {
-            minorVersion = 10,
             severityAdd = "NONE",
             severityRemove = "CRITICAL",
             name = _("name"),
@@ -15,7 +14,7 @@
                     tfnetId = 27218,
                 }
             },
-            tags = {"Train Station", "Station"},
+            tags = {"Misc", "Script Mod"},
         },
     }
 end
