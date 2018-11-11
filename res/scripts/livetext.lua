@@ -2,6 +2,7 @@ local pipe = require "livetext/pipe"
 local func = require "livetext/func"
 local coor = require "livetext/coor"
 local bit32 = bit32
+local unpack = table.unpack
 local band = bit32.band
 local lshift = bit32.lshift
 local bor = bit32.bor
@@ -24,16 +25,17 @@ local function utf2unicode(str)
                 or c < 0xF8 and 4
                 or error("invalid UTF-8 character sequence")
             local val, rest = continue(band(c, 2 ^ (8 - lGr) - 1), ...)
-            return convert(rs / val, table.unpack(rest))
+            return convert(rs / val, unpack(rest))
         end
     end
     return convert(pipe.new, str:byte(1, -1))
 end
 
-local gen = function(font, style)
+local gen = function(font, style, color)
     local facename = (style and font .. "_" .. style or font):lower()
     
-    local abc, kern = table.unpack(require("livetext/" .. facename))
+    local abc, kern = unpack(require("livetext/" .. facename))
+    local path = "livetext/" .. facename .. "/" .. color .. "/"
     return function(scale, z, twoSide)
         local scale = scale or 1
         local z = z or 0
@@ -41,22 +43,26 @@ local gen = function(font, style)
             local result = utf2unicode(text)
                 * pipe.fold(pipe.new, 
                 function(r, c)
-                    local lastPos = #r > 0 and r[#r].to or 0
                     local abc = abc[c]
                     local kern = kern[c]
+                    local lastPos = #r > 0 and r[#r].to or 0
                     local pos = lastPos + abc.a + (#r > 0 and kern and kern[r[#r].c] or 0)
                     local nextPos = pos + abc.b + abc.c
                     return r / {c = c, from = pos, to = nextPos}
                 end)
-            local width = #result > 0 and result[#result].to * scale or false
-            return 
-                function(fTrans) return func.map(result, function(r)
-                    return {
-                        id = "livetext/" .. facename .. "/" .. tostring(r.c) .. ".mdl",
-                        transf = coor.transX(r.from) * coor.scale(coor.xyz(scale, scale, scale)) * coor.transZ(z * scale) * (fTrans(width) or coor.I())
-                    }
-                end)
-            end, width
+            if (#result > 0) then
+                local width = result[#result].to * scale
+                return 
+                    function(fTrans) return func.map(result, function(r)
+                        return {
+                            id = path .. tostring(r.c) .. ".mdl",
+                            transf = coor.transX(r.from) * coor.scale(coor.xyz(scale, scale, scale)) * coor.transZ(z * scale) * (fTrans(width) or coor.I())
+                        }
+                    end)
+                end, width
+            else
+                return false, false
+            end
         end
     end
 end

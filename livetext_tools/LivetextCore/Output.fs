@@ -131,9 +131,9 @@ module Output =
           (dest, size)
         ) in
         let colorName = sprintf "C%02X%02X%02X%02X" color.A color.R color.G color.B
-        dds (texturesPath + midFix + colorName) mipmap;
-        generateMaterial ("models/" + midFix + colorName) (materialPath + midFix + colorName);
-        midFix + colorName
+        dds (texturesPath + "livetext/" + colorName) mipmap;
+        generateMaterial ("models/livetext/" + colorName) (materialPath + "livetext/" + colorName);
+        "livetext/" + colorName
 
     let drawGlyph (font : Font) midFix texturesPath materialPath (gl : uint32) =
       let mipmap =
@@ -294,26 +294,26 @@ module Output =
         |> (fun y -> fun pt -> pt - new Vector2(0.0f, Seq.max y))
       
       fun (glyph : uint32) ->
-        ////bmp check
-        //let check (triangles : DelaunayTriangle list) = 
-        //  let size = new Size(1000, 1000)
-        //  let bmp = new Bitmap(size.Width, size.Height)
-        //  let rect = new Rectangle(new Point(0, 0), size)
-        //  let brush = new Pen(new SolidBrush(Color.Black))
-        //  let g = Graphics.FromImage(bmp)
-        //  g.SmoothingMode <- SmoothingMode.AntiAlias;
-        //  g.InterpolationMode <- InterpolationMode.HighQualityBicubic;
-        //  g.PixelOffsetMode <- PixelOffsetMode.HighQuality;
-        //  g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit;
-        //  g.FillRectangle(new SolidBrush(Color.White), rect);
-        //  g.DrawLine(brush, 0, 800, 1000, 800)
-        //  g.DrawRectangle(brush, rect)
-        //  triangles |> List.iter (fun t ->
-        //    g.DrawPolygon(brush, t.Points |> Seq.map (fun p -> new Point(int (p.X * 10.0), int (-p.Y * 10.0))) |> Seq.toArray)
-        //  )
-        //  g.Flush()
-        //  Directory.CreateDirectory(outputPath + "error/") |> ignore
-        //  bmp.Save(outputPath + "error/" + glyph.ToString() + ".bmp")
+        //bmp check
+        let check (triangles : DelaunayTriangle list) = 
+          let size = new Size(1000, 1000)
+          let bmp = new Bitmap(size.Width, size.Height)
+          let rect = new Rectangle(new Point(0, 0), size)
+          let brush = new Pen(new SolidBrush(Color.Black))
+          let g = Graphics.FromImage(bmp)
+          g.SmoothingMode <- SmoothingMode.AntiAlias;
+          g.InterpolationMode <- InterpolationMode.HighQualityBicubic;
+          g.PixelOffsetMode <- PixelOffsetMode.HighQuality;
+          g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit;
+          g.FillRectangle(new SolidBrush(Color.White), rect);
+          g.DrawLine(brush, 0, 800, 1000, 800)
+          g.DrawRectangle(brush, rect)
+          triangles |> List.iter (fun t ->
+            g.DrawPolygon(brush, t.Points |> Seq.map (fun p -> new Point(int (p.X * 10.0), int (-p.Y * 10.0))) |> Seq.toArray)
+          )
+          g.Flush()
+          Directory.CreateDirectory(outputPath + "error/") |> ignore
+          bmp.Save(outputPath + "error/" + glyph.ToString() + ".bmp")
 
         let pts  = 
           use path = new GraphicsPath()
@@ -337,6 +337,11 @@ module Output =
           |> List.map (List.map (fun p -> new Vector2(p.X, p.Y) |> transform))
           |> List.filter (fun p -> p |> List.length > 2)
       
+        let leftMost =
+          match poly with
+          | [] -> 0.0f
+          | _ -> poly |> List.concat |> List.map (fun v -> v.X) |> List.min
+
         let triangles = 
           match poly.Length with
           | 0 -> []
@@ -349,12 +354,11 @@ module Output =
               |> List.collect(fun p -> List.ofSeq p.Triangles)
             with 
             | _ -> printfn "Error parsing %x" glyph; []
-
+        check triangles;
         let vertices = 
           triangles
           |> List.collect(fun t -> List.ofSeq t.Points)
-          |> List.map(fun p -> new Vector3(p.Xf, 0.0f, -p.Yf) / font.Size)
-      
+          |> List.map(fun p -> new Vector3(p.Xf - leftMost, 0.0f, -p.Yf) / font.Size)
 
         let mesh : MeshData = {
           normals = vertices |> List.map (fun _ -> new Vector3(0.0f, -1.0f, 0.0f));
