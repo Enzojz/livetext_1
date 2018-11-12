@@ -1,63 +1,67 @@
-function data() return 
-  {
-animations = {  },
-matConfigs = 
-    { { 0 }, { 1 }, { 2 }, { 3 }, { 4 } },
-subMeshes = 
-    { 
-      {
-indices = 
-        {
-normal = 
-          {
-count = 1200,
-offset = 14400
-           },
-position = 
-          {
-count = 1200,
-offset = 14400
-           },
-tangent = 
-          {
-count = 1200,
-offset = 14400
-           },
-uv0 = 
-          {
-count = 1200,
-offset = 14400
-           }
-         },
-materials = 
-        { "livetext/CFFF2F2F2.mtl", "livetext/CFF000000.mtl", "livetext/CFF101727.mtl", "livetext/CFF00257E.mtl", "livetext/CFF0179C7.mtl" }
-       }
-     },
-vertexAttr = 
+function data() return {
+  animations = {  },
+  matConfigs = {
+    { 0 },
+    { 1 },
+    { 2 },
+    { 3 },
+    { 4 },
+    { 5 },
+    { 6 },
+    { 7 }
+    },
+  subMeshes = {
     {
-normal = 
-      {
-count = 3600,
-numComp = 3,
-offset = 6000
-       },
-position = 
-      {
-count = 3600,
-numComp = 3,
-offset = 0
-       },
-tangent = 
-      {
-count = 4800,
-numComp = 4,
-offset = 9600
-       },
-uv0 = 
-      {
-count = 2400,
-numComp = 2,
-offset = 3600
-       }
-     }
-   } end
+      indices = {
+        normal = {
+          count = 1200,
+          offset = 14400
+                },
+        position = {
+          count = 1200,
+          offset = 14400
+                },
+        tangent = {
+          count = 1200,
+          offset = 14400
+                },
+        uv0 = {
+          count = 1200,
+          offset = 14400
+                }
+            },
+      materials = {
+        "livetext/CFFF2F2F2.mtl",
+        "livetext/CFF000000.mtl",
+        "livetext/CFF0A1E6E.mtl",
+        "livetext/CFFF01414.mtl",
+        "livetext/CFF143A84.mtl",
+        "livetext/CFF101727.mtl",
+        "livetext/CFF00257E.mtl",
+        "livetext/CFF0179C7.mtl"
+            }
+        }
+    },
+  vertexAttr = {
+    normal = {
+      count = 3600,
+      numComp = 3,
+      offset = 6000
+        },
+    position = {
+      count = 3600,
+      numComp = 3,
+      offset = 0
+        },
+    tangent = {
+      count = 4800,
+      numComp = 4,
+      offset = 9600
+        },
+    uv0 = {
+      count = 2400,
+      numComp = 2,
+      offset = 3600
+        }
+    }
+} end
