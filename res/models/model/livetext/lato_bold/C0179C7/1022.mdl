@@ -18,7 +18,7 @@ function data() return {
             },
       events = {  },
       matConfigs = {
-        { 7 }
+        { 4 }
             },
       static = true,
       visibleFrom = 0,

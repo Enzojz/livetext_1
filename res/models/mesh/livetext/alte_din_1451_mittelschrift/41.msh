@@ -5,10 +5,7 @@ function data() return {
     { 1 },
     { 2 },
     { 3 },
-    { 4 },
-    { 5 },
-    { 6 },
-    { 7 }
+    { 4 }
     },
   subMeshes = {
     {
@@ -33,9 +30,6 @@ function data() return {
       materials = {
         "livetext/CFFF2F2F2.mtl",
         "livetext/CFF000000.mtl",
-        "livetext/CFF0A1E6E.mtl",
-        "livetext/CFFF01414.mtl",
-        "livetext/CFF143A84.mtl",
         "livetext/CFF101727.mtl",
         "livetext/CFF00257E.mtl",
         "livetext/CFF0179C7.mtl"
