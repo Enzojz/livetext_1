@@ -1,0 +1,63 @@
+function data() return 
+  {
+animations = {  },
+matConfigs = 
+    { { 0 }, { 1 }, { 2 }, { 3 }, { 4 } },
+subMeshes = 
+    { 
+      {
+indices = 
+        {
+normal = 
+          {
+count = 1272,
+offset = 15264
+           },
+position = 
+          {
+count = 1272,
+offset = 15264
+           },
+tangent = 
+          {
+count = 1272,
+offset = 15264
+           },
+uv0 = 
+          {
+count = 1272,
+offset = 15264
+           }
+         },
+materials = 
+        { "livetext/CFFF2F2F2.mtl", "livetext/CFF000000.mtl", "livetext/CFF101727.mtl", "livetext/CFF00257E.mtl", "livetext/CFF0179C7.mtl" }
+       }
+     },
+vertexAttr = 
+    {
+normal = 
+      {
+count = 3816,
+numComp = 3,
+offset = 6360
+       },
+position = 
+      {
+count = 3816,
+numComp = 3,
+offset = 0
+       },
+tangent = 
+      {
+count = 5088,
+numComp = 4,
+offset = 10176
+       },
+uv0 = 
+      {
+count = 2544,
+numComp = 2,
+offset = 3816
+       }
+     }
+   } end

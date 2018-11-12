@@ -16,15 +16,14 @@ animations = {  },
 children = 
         { 
           {
-id = 
-            "livetext/lato_bold/C000000/389.msh",
+id = "livetext/lato_bold/389.msh",
 transf = 
             { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
 type = "MESH"
            }
          },
 events = {  },
-matConfigs = { { 0 } },
+matConfigs = { { 1 } },
 static = true,
 visibleFrom = 0,
 visibleTo = 2000

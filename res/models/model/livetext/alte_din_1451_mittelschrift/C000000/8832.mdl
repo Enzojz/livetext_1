@@ -17,14 +17,14 @@ children =
         { 
           {
 id = 
-            "livetext/alte_din_1451_mittelschrift/C000000/8832.msh",
+            "livetext/alte_din_1451_mittelschrift/8832.msh",
 transf = 
             { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
 type = "MESH"
            }
          },
 events = {  },
-matConfigs = { { 0 } },
+matConfigs = { { 1 } },
 static = true,
 visibleFrom = 0,
 visibleTo = 2000
