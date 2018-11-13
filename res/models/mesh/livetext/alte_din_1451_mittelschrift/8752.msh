@@ -3,59 +3,27 @@ function data() return {
   matConfigs = {
     { 0 },
     { 1 },
-    { 2 },
-    { 3 },
-    { 4 }
-    },
+    { 2 }
+  },
   subMeshes = {
     {
       indices = {
-        normal = {
-          count = 3024,
-          offset = 36288
-                },
-        position = {
-          count = 3024,
-          offset = 36288
-                },
-        tangent = {
-          count = 3024,
-          offset = 36288
-                },
-        uv0 = {
-          count = 3024,
-          offset = 36288
-                }
-            },
+        normal   = { count = 3024, offset = 36288 },
+        position = { count = 3024, offset = 36288 },
+        tangent  = { count = 3024, offset = 36288 },
+        uv0      = { count = 3024, offset = 36288 }
+      },
       materials = {
         "livetext/CFFF2F2F2.mtl",
         "livetext/CFF000000.mtl",
-        "livetext/CFF101727.mtl",
-        "livetext/CFF00257E.mtl",
-        "livetext/CFF0179C7.mtl"
-            }
-        }
-    },
-  vertexAttr = {
-    normal = {
-      count = 9072,
-      numComp = 3,
-      offset = 15120
-        },
-    position = {
-      count = 9072,
-      numComp = 3,
-      offset = 0
-        },
-    tangent = {
-      count = 12096,
-      numComp = 4,
-      offset = 24192
-        },
-    uv0 = {
-      count = 6048,
-      numComp = 2,
-      offset = 9072
-        }
+        "livetext/CFFFFFFFF.mtl"
+      }
     }
+  },
+  vertexAttr = {
+    normal   = { count = 9072, numComp = 3, offset = 15120 },
+    position = { count = 9072, numComp = 3, offset = 0 },
+    tangent  = { count = 12096, numComp = 4, offset = 24192 },
+    uv0      = { count = 6048, numComp = 2, offset = 9072 }
+  }
 } end

@@ -14,7 +14,7 @@ Livetext mod use unicode, the following charset are supported by the default pac
 
 Other fonts and charsets can be extended by Livetext glyph generator for specific or general mods.
 The Livetext glyph generator will be available on:
-https://github.com/Enzojz/livetext_tool
+https://github.com/Enzojz/LivetextTool
 
 For example project, see Platform Signs.]],
         },

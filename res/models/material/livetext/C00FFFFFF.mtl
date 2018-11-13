@@ -9,14 +9,9 @@ function data() return {
       type = "TWOD",
       wrapS = "CLAMP_TO_EDGE",
       wrapT = "CLAMP_TO_EDGE"
-        },
-    polygon_offset = {
-      factor = 0,
-      units = 0
-        },
-    two_sided = {
-      twoSided = true
-        }
     },
+    polygon_offset  = { factor = 0, units = 0 },
+    two_sided       = { twoSided = true }
+  },
   type = "TRANSPARENT"
 } end
