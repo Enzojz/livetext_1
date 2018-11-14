@@ -31,18 +31,29 @@ local function utf2unicode(str)
     return convert(pipe.new, str:byte(1, -1))
 end
 
-local gen = function(font, style, color)
-    local facename, color, abc, kern = (function()
-        local facename = (style and font .. "_" .. style or font):lower()
-        local r, i = xpcall(
+local tryLoad = function(font, style)
+    local facename = (style and font .. "_" .. style or font):lower()
+    local r, i = xpcall(
             require,
             function(e) print ("not able to find font " .. facename .. ", fallback used") end,
             "livetext/" .. facename
         )
+    return r, i
+end
+
+local gen = function(font, style, color)
+    local facename, color, abc, kern = (function()
+        local facename = (style and font .. "_" .. style or font):lower()
+        local r, i = tryLoad(font, style)
         if (r and i) then
             return facename, color, unpack(i)
         else
-            return  "lato", "CFFFFFF", unpack(require("livetext/lato"))
+            local r, i = tryLoad(font)
+            if (r and i) then
+                return facename:lower(), color, unpack(i)
+            else
+                return  "lato", "CFFFFFF", unpack(require("livetext/lato"))
+            end
         end
     end)()
     local path = "livetext/" .. facename .. "/" .. color .. "/"
@@ -53,7 +64,8 @@ local gen = function(font, style, color)
             local result = utf2unicode(text)
                 * pipe.fold(pipe.new, 
                 function(r, c)
-                    local abc = abc[c]
+                    local c = abc[c] and c or 32
+                    local abc = abc[c] or {a = 0, b = scale, c = 0} --fallback
                     local kern = kern[c]
                     local lastPos = #r > 0 and r[#r].to or 0
                     local pos = lastPos + abc.a + (#r > 0 and kern and kern[r[#r].c] or 0)
