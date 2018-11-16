@@ -52,15 +52,16 @@ local gen = function(font, style, color)
             if (r and i) then
                 return facename:lower(), color, unpack(i)
             else
-                return  "lato", "CFFFFFF", unpack(require("livetext/lato"))
+                return  "lato", "C000000", unpack(require("livetext/lato"))
             end
         end
     end)()
     local path = "livetext/" .. facename .. "/" .. color .. "/"
     return function(scale, z, twoSide)
-        local scale = scale or 1
+        local scale = scale or 1 -- the em size is 3/4 of the scale
         local z = z or 0
         return function(text)
+            assert(text and #text > 0)
             local result = utf2unicode(text)
                 * pipe.fold(pipe.new, 
                 function(r, c)

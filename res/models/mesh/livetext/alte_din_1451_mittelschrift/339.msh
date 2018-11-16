@@ -8,10 +8,10 @@ function data() return {
   subMeshes = {
     {
       indices = {
-        normal   = { count = 1344, offset = 16128 },
-        position = { count = 1344, offset = 16128 },
-        tangent  = { count = 1344, offset = 16128 },
-        uv0      = { count = 1344, offset = 16128 }
+        normal   = { count = 1632, offset = 19584 },
+        position = { count = 1632, offset = 19584 },
+        tangent  = { count = 1632, offset = 19584 },
+        uv0      = { count = 1632, offset = 19584 }
       },
       materials = {
         "livetext/CFFF2F2F2.mtl",
@@ -21,9 +21,9 @@ function data() return {
     }
   },
   vertexAttr = {
-    normal   = { count = 4032, numComp = 3, offset = 6720 },
-    position = { count = 4032, numComp = 3, offset = 0 },
-    tangent  = { count = 5376, numComp = 4, offset = 10752 },
-    uv0      = { count = 2688, numComp = 2, offset = 4032 }
+    normal   = { count = 4896, numComp = 3, offset = 8160 },
+    position = { count = 4896, numComp = 3, offset = 0 },
+    tangent  = { count = 6528, numComp = 4, offset = 13056 },
+    uv0      = { count = 3264, numComp = 2, offset = 4896 }
   }
 } end
